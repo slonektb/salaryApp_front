@@ -1,0 +1,119 @@
+<div class="row justify-content-center">
+  <div class="container">
+    <div class="form-group" [formGroup]="operForm" (ngSubmit)="submit()">
+      <div class="row">
+        <div class="col-md-2">
+          <td>
+            <input type=month step="1" class="form-control" formControlName="date">
+          </td>
+        </div>
+          <div class="col-md-10">
+            <button type="submit" class="btn btn-success" style="display: block; margin-left: 900px"
+                    (click)="openModalWindowAskAdd(content, -100, '', [], 0, 0,
+            0)">Добавить оператора
+            </button>
+          </div>
+      </div>
+      <div>
+        <p></p>
+      </div>
+      <div class="overflow">
+        <table class="table table-striped text-center align-middle">
+          <thead>
+          <tr>
+            <th></th>
+            <th></th>
+            <th><a href="" [routerLink]="['/operator/change', 1]"> {{(operForm.get(['date'])!.value) + "-" + 1}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 2]"> {{(operForm.get(['date'])!.value) + "-" + 2}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 3]"> {{(operForm.get(['date'])!.value) + "-" + 3}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 4]"> {{(operForm.get(['date'])!.value) + "-" + 4}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 5]"> {{(operForm.get(['date'])!.value) + "-" + 5}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 6]"> {{(operForm.get(['date'])!.value) + "-" + 6}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 7]"> {{(operForm.get(['date'])!.value) + "-" + 7}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 8]"> {{(operForm.get(['date'])!.value) + "-" + 8}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 9]"> {{(operForm.get(['date'])!.value) + "-" + 9}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 10]"> {{(operForm.get(['date'])!.value) + "-" + 10}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 11]"> {{(operForm.get(['date'])!.value) + "-" + 11}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 12]"> {{(operForm.get(['date'])!.value) + "-" + 12}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 13]"> {{(operForm.get(['date'])!.value) + "-" + 13}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 14]"> {{(operForm.get(['date'])!.value) + "-" + 14}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 15]"> {{(operForm.get(['date'])!.value) + "-" + 15}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 16]"> {{(operForm.get(['date'])!.value) + "-" + 16}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 17]"> {{(operForm.get(['date'])!.value) + "-" + 17}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 18]"> {{(operForm.get(['date'])!.value) + "-" + 18}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 19]"> {{(operForm.get(['date'])!.value) + "-" + 19}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 20]"> {{(operForm.get(['date'])!.value) + "-" + 20}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 21]"> {{(operForm.get(['date'])!.value) + "-" + 21}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 22]"> {{(operForm.get(['date'])!.value) + "-" + 22}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 23]"> {{(operForm.get(['date'])!.value) + "-" + 23}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 24]"> {{(operForm.get(['date'])!.value) + "-" + 24}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 25]"> {{(operForm.get(['date'])!.value) + "-" + 25}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 26]"> {{(operForm.get(['date'])!.value) + "-" + 26}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 27]"> {{(operForm.get(['date'])!.value) + "-" + 27}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 28]"> {{(operForm.get(['date'])!.value) + "-" + 28}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 29]"> {{(operForm.get(['date'])!.value) + "-" + 29}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 30]"> {{(operForm.get(['date'])!.value) + "-" + 30}} </a></th>
+            <th><a href="" [routerLink]="['/operator/change', 31]"> {{(operForm.get(['date'])!.value) + "-" + 31}} </a></th>
+            <th>Итого часов</th>
+            <th>Ставка</th>
+            <th>Итого</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let op of operators">
+            <th>{{op.id}}</th>
+            <th>{{op.fullName}}</th>
+            <th *ngFor="let d of days">{{op.total_hours}}</th>
+            <th>{{op.total_hours * 31}}</th>
+            <th>{{op.hourly_rate}}</th>
+            <th>{{op.total_hours * op.hourly_rate * 31}}</th>
+            <th>
+              <button class="btn btn-danger"
+                      (click)="openModalWindowAskDelete(del, op.id, op.fullName)">Удалить
+              </button>
+            </th>
+          </tr>
+          </tbody>
+        </table>
+        <td>
+          <!--          <button type="submit" class="btn btn-primary" style="display: block; " [routerLink]="['/operator/change']">Редактировать-->
+          <!--                  [queryParams]="{app: op.fullName}"-->
+          <!--          </button>-->
+        </td>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #content let-modal>
+  <form [formGroup]="operForm">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-answer-add">Вы действительно хотите добавить оператора?
+      </h3>
+    </div>
+    <div class="modal-footer">
+      <label>ФИ</label>
+      <input type="text" class="form-control" formControlName="fullName">
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cancel')"><span>Отменить</span></button>
+      <button type="button" class="btn btn-danger" (click)="modal.close('Save')" [disabled]="operForm.invalid">
+        <span>Сохранить</span></button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #del let-modal>
+  <form [formGroup]="operForm">
+    <div class="modal-header">
+      <h3 class="modal-title">Вы действительно хотите удалить из списка оператора {{nameOperatorDelete}} ?
+      </h3>
+    </div>
+    <div class="modal-body">
+      Оператор будет удален!
+    </div>
+  </form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cancel')"><span>Отменить</span></button>
+    <button type="button" class="btn btn-danger" (click)="modal.close('Delete')"><span>Удалить</span></button>
+  </div>
+</ng-template>
+

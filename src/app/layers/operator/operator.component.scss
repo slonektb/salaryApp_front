@@ -1,0 +1,35 @@
+
+.btn-primary {
+  cursor: pointer;
+  border: none;
+  font-family: Arial, serif;
+  outline: none;
+  transition: 0.2s;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+.btn-primary:active {
+  transform: translateY(-1px);
+}
+
+.overflow {
+  overflow: auto;
+  width: 1310px;
+  height: 480px;
+  border: 1px solid black;
+}
+.container{
+  padding-left: 30px;
+  //padding-right: 30px;
+}
+.table{
+  width: 100%
+}
+.th{
+  border: 1px solid black
+}
+
+
+
+
