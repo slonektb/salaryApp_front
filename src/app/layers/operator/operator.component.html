@@ -26,26 +26,32 @@
             <th>ID</th>
             <th>ФИ</th>
             <th colspan="idx">Периоды</th>
-            <th></th>
             <th>Итого часов</th>
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let d of detailSalaryDtos">
-            <th style="border: 1px solid black">{{d.id}}</th>
-            <th style="border: 1px solid black">{{d.fullName}}</th>
-            <th *ngFor="let con of d.salaries; let idx = index">
-              <div class="form-control" formGroupName="{{d.id}}">
-                <input style="width: 55px" type="number" formControlName="begin{{con.id}}">
-                <input style="width: 55px" type="number" formControlName="{{'end'+ con.id}}">
+          <tr formArrayName="opers" *ngFor="let getOper of getOpers().controls; let i = index">
+            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('id')?.value}}</td>
+            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('fullName')?.value}}</td>
+            <!--            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('periods')?.value.controls}}-->
+            <td>
+              <p>1</p>
+              <div formArrayName="periods"
+                   *ngFor="let period of getPeriods(getOper.get('periods')).controls; let i = index">
+                <div class="form-control">
+                  <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="begin">
+                  <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="end">
+                </div>
               </div>
-            </th>
-            <th style="border: 1px solid black">
+              <!--            </td>-->
+            </td>
+            <td style="border: 1px solid black">
               <button class="btn" type="button" (click)="addPeriodsToOperator()">+</button>
-            </th>
+            </td>
           </tr>
           </tbody>
         </table>
+        <!--        {{formOpers.value | json}}-->
       </div>
     </form>
   </div>

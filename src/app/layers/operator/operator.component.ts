@@ -1,7 +1,16 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {OperatorService} from "./service/operator.service";
 import {OperatorDto} from "../../model/operatorDto";
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormControlName,
+  FormGroup,
+  FormGroupDirective,
+  Validators
+} from "@angular/forms";
 import {DetailSalaryDto} from "../../model/detailSalaryDto";
 import {DetailSalary} from "../../model/detailSalary";
 
@@ -15,19 +24,21 @@ import {DetailSalary} from "../../model/detailSalary";
 export class OperatorComponent implements OnInit {
 
   loading: boolean = false;
-  detailSalary: DetailSalary[] = []
-  operators: OperatorDto[] = [];
-  detailSalaryDtos: DetailSalaryDto[] = [];
+  detailSalary: DetailSalary[] = [];
+  operators: DetailSalaryDto[] = [];
+  operatorDTO: OperatorDto[] = [];
 
 
   clicked: boolean = false
-  idx: number = 0;
 
   constructor(public operatorService: OperatorService, private formBuilder: FormBuilder) {
   }
 
   ngOnInit(): void {
-    this.findAllOperators()
+    this.operatorService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
+      .subscribe(response => {
+        this.operatorDTO = response
+      })
 
   }
 
@@ -38,44 +49,80 @@ export class OperatorComponent implements OnInit {
   }
 
   fillOperators() {
+    console.log(this.operators)
     for (let operator of this.operators) {
-      this.formOpers.addControl(String(operator.id), new FormArray([]))
-      this.formOpers.addControl(String(operator.id) + '-name', new FormControl(operator.fullName))
+      const arrayPeriod = this.formBuilder.array([]);
+      for (let period of operator.salaries) {
+        arrayPeriod.push(this.formBuilder.group({
+          begin: [period.begin],
+          end: [period.end]
+        }))
+      }
+      console.log(arrayPeriod);
+      (this.formOpers.get('opers') as FormArray).push(
+        this.formBuilder.group({
+          id: [operator.id],
+          fullName: [operator.fullName],
+          periods: [arrayPeriod]
+        })
+      )
+      // this.formOpers.addControl(String(operator.id), new FormArray([]))
+      // this.formOpers.addControl(String(operator.id) + '-name', new FormControl(operator.fullName))
     }
-
-    this.addPeriodsToOperator()
+    console.log(this.formOpers)
+    // this.addPeriodsToOperator()
   }
 
-  formOpers = this.formBuilder.group({});
+  formOpers = this.formBuilder.group({
+    opers: this.formBuilder.array([])
+  });
 
-  findAllOperators() {
-    this.operatorService.findAllOperators(
-      String(new Date().getFullYear()), new Date().getUTCMonth() + 1).subscribe(response => {
+  findAllOperators(year: string, month: number) {
+    this.operatorService.findAllDetailSalary(
+      String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getUTCDate()).subscribe(response => {
       this.operators = response;
       this.fillOperators()
     })
   }
 
-  addPeriodsToOperator() {
-    this.operatorService.findAllDetailSalary(
-      String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getDay())
-      .subscribe(response => {
-        this.detailSalaryDtos = response;
-        console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
-        for (let detailSal of this.detailSalaryDtos) {
-          this.formOpers.addControl(String(detailSal.id), new FormArray([]));
-          for (let d of detailSal.salaries) {
-            const formGroup = new FormGroup({});
-            // formGroup.addControl(String('begin' + d.id), new FormControl(d.begin));
-            formGroup.addControl(String('begin' + d.id), new FormControl(String('begin' + d.begin), Validators.required));
-            // formGroup.addControl(String('end' + d.id), new FormControl(d.end));
-            formGroup.addControl('', new FormControl(String(detailSal.end)));
-            (<FormArray>this.formOpers.get(String(detailSal.id))).push(formGroup);
-          }
-        }
-        console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
-      })
+  getOpers(): FormArray {
+    return this.formOpers.get('opers') as FormArray;
   }
+
+  getPeriods(arrayPeriod: AbstractControl | null): FormArray {
+    console.log((arrayPeriod as FormArray))
+    if (arrayPeriod) {
+      return (arrayPeriod as FormArray);
+    }
+
+    return new FormArray([]);
+  }
+
+  addPeriodsToOperator() {
+    // this.operatorService.findAllDetailSalary(
+    //   String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getDay())
+    //   .subscribe(response => {
+    //     // this.detailSalaryDtos = response;
+    //     console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
+    //     for (let detailSal of this.detailSalaryDtos) {
+    //       this.formOpers.addControl(String(detailSal.id), new FormArray([]));
+    //       for (let d of detailSal.salaries) {
+    //         const formGroup = new FormGroup({});
+    //         formGroup.addControl(String('begin' + d.id), new FormControl(d.begin));
+    //         formGroup.addControl(String('end' + d.id), new FormControl(d.end));
+    //
+    //         (<FormArray>this.formOpers.get(String(detailSal.id))).push(formGroup);
+    //       }
+    //     }
+    //     console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
+    //   })
+  }
+
+  // change() {
+  //   this.formOpers.removeControl(this.);
+  //   this.controlDir.name = this.currentFormControlName = 'email'
+  //   this.formDir.addControl(this.controlDir);
+  // }
 
   // test() {
   //   //
@@ -98,10 +145,6 @@ export class OperatorComponent implements OnInit {
   //     sum = period.get('end')?.value - period.get('begin')?.value
   //   }
   //   return sum;
-  // }
-
-  // getOper(): FormArray {
-  //   return this.formOpers.get('formOper') as FormArray;
   // }
 
   // addOper(id: number, name: string) {

@@ -10,7 +10,6 @@ const routes: Routes = [
   {path: 'operator/test', component: AComponent, canActivate: [GlobalGuard]},
   // {path: 'operator/date', component: CalendarComponent, canActivate: [GlobalGuard]},
   {path: 'operator/change/:day', component: OperatorComponent, canActivate: [GlobalGuard]},
-  // {path: 'operator/change/:day', component: OperatorComponent, canActivate: [GlobalGuard]},
 ];
 
 @NgModule({
