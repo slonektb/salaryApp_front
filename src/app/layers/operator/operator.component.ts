@@ -25,7 +25,7 @@ export class OperatorComponent implements OnInit {
 
   loading: boolean = false;
   detailSalary: DetailSalary[] = [];
-  operators: DetailSalaryDto[] = [];
+  detailSalaryDtos: DetailSalaryDto[] = [];
   operatorDTO: OperatorDto[] = [];
 
 
@@ -35,10 +35,7 @@ export class OperatorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.operatorService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
-      .subscribe(response => {
-        this.operatorDTO = response
-      })
+    this.findAllOperators()
 
   }
 
@@ -49,8 +46,8 @@ export class OperatorComponent implements OnInit {
   }
 
   fillOperators() {
-    console.log(this.operators)
-    for (let operator of this.operators) {
+    console.log(this.detailSalaryDtos)
+    for (let operator of this.detailSalaryDtos) {
       const arrayPeriod = this.formBuilder.array([]);
       for (let period of operator.salaries) {
         arrayPeriod.push(this.formBuilder.group({
@@ -77,10 +74,10 @@ export class OperatorComponent implements OnInit {
     opers: this.formBuilder.array([])
   });
 
-  findAllOperators(year: string, month: number) {
+  findAllOperators() {
     this.operatorService.findAllDetailSalary(
       String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getUTCDate()).subscribe(response => {
-      this.operators = response;
+      this.detailSalaryDtos = response;
       this.fillOperators()
     })
   }
@@ -94,7 +91,6 @@ export class OperatorComponent implements OnInit {
     if (arrayPeriod) {
       return (arrayPeriod as FormArray);
     }
-
     return new FormArray([]);
   }
 

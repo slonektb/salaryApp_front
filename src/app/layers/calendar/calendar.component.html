@@ -60,7 +60,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let op of operators">
+          <tr *ngFor="let op of operatorDtos">
             <th>{{op.id}}</th>
             <th>{{op.fullName}}</th>
             <th *ngFor="let d of days">{{op.total_hours}}</th>

@@ -15,7 +15,7 @@ export class CalendarComponent implements OnInit {
   timeout: boolean = false;
   startDateOption: Date = new Date(new Date().setDate(new Date().getDate() - 1));
   timezoneServer: string = TIMEZONE;
-  operators: OperatorDto[] = [];
+  operatorDtos: OperatorDto[] = [];
   loading: boolean = false;
   salarys: Salary[] = []
 
@@ -45,10 +45,10 @@ export class CalendarComponent implements OnInit {
     const date: Date = new Date(this.operForm.get(['date'])!.value);
     this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
       .subscribe(response => {
-      this.operators = response;
+      this.operatorDtos = response;
       this.loading = false;
       console.log("this.operForm.get('date')!.value", this.operForm.get('date')!.value)
-      console.log(this.operators)
+      console.log(this.operatorDtos)
     })
   }
 
@@ -123,7 +123,7 @@ export class CalendarComponent implements OnInit {
     this.calendarService.add(operator).subscribe(() => {
         this.message = 'Сохранение было успешным!';
         this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
-          .subscribe(operator => this.operators = operator)
+          .subscribe(operator => this.operatorDtos = operator)
       },
       error => {
         if (/.*constraint.*/.test(error.error.message)) {
@@ -150,7 +150,7 @@ export class CalendarComponent implements OnInit {
       this.errorMessage = '';
       this.message = 'Оператор был успешно удален!';
       this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
-        .subscribe(operator => this.operators = operator)
+        .subscribe(operator => this.operatorDtos = operator)
     }, () => {
       this.errorMessage = 'При удалении темы произошла ошибка!';
     });

@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams, HttpResponse} from "@angular/common/http";
-import {Observable, tap} from "rxjs";
+import {HttpClient} from "@angular/common/http";
+import {Observable} from "rxjs";
 import {URL_SERVER} from "../../../model/app.constants";
 import {OperatorDto} from "../../../model/operatorDto";
 import {DetailSalaryDto} from "../../../model/detailSalaryDto";
