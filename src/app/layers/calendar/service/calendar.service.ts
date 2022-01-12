@@ -21,8 +21,8 @@ export class CalendarService {
   //   return this.http.get<OperatorDto[]>(this.url);
   // }
 
-  findAllOperators(year: string, month: number): Observable<OperatorDto[]> {
-    return this.http.get<OperatorDto[]>(`${this.url}/date/${year}/${month}`);
+  findAllOperators(year: string, month: string): Observable<OperatorDto[]> {
+    return this.http.get<OperatorDto[]>(`${this.url}/${year}/${month}`);
   }
 
   /**

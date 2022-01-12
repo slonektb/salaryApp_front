@@ -21,9 +21,9 @@ export class OperatorService {
     this.http = http;
   }
 
-  findAllOperators(year: string, month: number): Observable<OperatorDto[]> {
-    return this.http.get<OperatorDto[]>(`${this.url}/date/${year}/${month}`);
-  }
+  // findAllOperators(year: string, month: number): Observable<OperatorDto[]> {
+  //   return this.http.get<OperatorDto[]>(`${this.url}/date/${year}/${month}`);
+  // }
 
   findAllDetailSalary(year: string, month: number, day: number): Observable<DetailSalaryDto[]> {
     return this.http.get<DetailSalaryDto[]>(`${this.url}/date/${year}/${month}/${day}`);

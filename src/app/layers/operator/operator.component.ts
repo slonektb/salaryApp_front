@@ -13,6 +13,9 @@ import {
 } from "@angular/forms";
 import {DetailSalaryDto} from "../../model/detailSalaryDto";
 import {DetailSalary} from "../../model/detailSalary";
+import {Subscription} from "rxjs";
+import {ActivatedRoute} from "@angular/router";
+import {DatePipe} from "@angular/common";
 
 
 @Component({
@@ -26,12 +29,20 @@ export class OperatorComponent implements OnInit {
   loading: boolean = false;
   detailSalary: DetailSalary[] = [];
   detailSalaryDtos: DetailSalaryDto[] = [];
-  operatorDTO: OperatorDto[] = [];
-
+  // operatorDTO: OperatorDto[] = [];
+  subscription: Subscription;
+  day: string = '';
+  month: string = '';
+  year: string = '';
+  datePaginator = new Date();
 
   clicked: boolean = false
 
-  constructor(public operatorService: OperatorService, private formBuilder: FormBuilder) {
+  constructor(public operatorService: OperatorService, private formBuilder: FormBuilder
+              , activateRoute: ActivatedRoute) {
+    this.subscription = activateRoute.params.subscribe(params => this.day = params['day']),
+    this.subscription = activateRoute.params.subscribe(params => this.month = params['month']),
+    this.subscription = activateRoute.params.subscribe(params => this.year = params['year'])
   }
 
   ngOnInit(): void {
@@ -75,8 +86,9 @@ export class OperatorComponent implements OnInit {
   });
 
   findAllOperators() {
-    this.operatorService.findAllDetailSalary(
-      String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getUTCDate()).subscribe(response => {
+    // this.datePipe.transform(this.datePaginator, 'yyyy-MM-dd');
+    this.operatorService.findAllDetailSalary(this.year, Number(this.month), Number(this.day))
+      .subscribe(response => {
       this.detailSalaryDtos = response;
       this.fillOperators()
     })
@@ -87,7 +99,7 @@ export class OperatorComponent implements OnInit {
   }
 
   getPeriods(arrayPeriod: AbstractControl | null): FormArray {
-    console.log((arrayPeriod as FormArray))
+    // console.log(arrayPeriod as FormArray)
     if (arrayPeriod) {
       return (arrayPeriod as FormArray);
     }

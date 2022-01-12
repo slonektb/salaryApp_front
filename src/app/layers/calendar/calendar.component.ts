@@ -1,10 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {TIMEZONE} from "../../model/app.constants";
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {CalendarService} from "./service/calendar.service";
 import {OperatorDto} from "../../model/operatorDto";
 import {Salary} from "../../model/salary";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ActivatedRoute} from "@angular/router";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-calendar',
@@ -18,10 +20,30 @@ export class CalendarComponent implements OnInit {
   operatorDtos: OperatorDto[] = [];
   loading: boolean = false;
   salarys: Salary[] = []
+  month: number = new Date().getUTCMonth() + 1;
+  year: number = new Date().getFullYear();
 
-  days: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 31];
 
+  // days: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+  //   15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 31];
+  // day: number = new Date().getDate();
+  // countDay: number = this.daysInMonth()
+  days: number[] = [];
+
+
+  daysInMonth () {
+    // const date: Date = new Date(this.operForm.get(['date'])!.value);
+    const date: string[] = this.operForm.get(['date'])!.value.split('-')
+     return new Date(Number(date[0]), Number(date[1]), 0).getDate();
+  }
+
+  countDays(): number[] {
+    this.days = []
+    for (let i = 1; i <= this.daysInMonth(); i++) {
+      this.days.push(i)
+    }
+    return this.days
+  }
   /*
   Создание формы
    */
@@ -32,21 +54,22 @@ export class CalendarComponent implements OnInit {
   errorMessage: string = '';
   nameOperatorAdd = '';
 
-
   constructor(private formBuilder: FormBuilder, public calendarService: CalendarService, private modalService: NgbModal) {
 
   }
 
   ngOnInit(): void {
-    this.findALL()
+    // this.findALL()
+    console.log('days: ' + this.days)
   }
 
   findALL() {
-    const date: Date = new Date(this.operForm.get(['date'])!.value);
-    this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
+    const date: string[] = this.operForm.get(['date'])!.value.split('-')
+    this.calendarService.findAllOperators(date[0], date[1])
       .subscribe(response => {
       this.operatorDtos = response;
       this.loading = false;
+      this.countDays()
       console.log("this.operForm.get('date')!.value", this.operForm.get('date')!.value)
       console.log(this.operatorDtos)
     })
@@ -122,7 +145,7 @@ export class CalendarComponent implements OnInit {
   private create(operator: OperatorDto): void {
     this.calendarService.add(operator).subscribe(() => {
         this.message = 'Сохранение было успешным!';
-        this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
+        this.calendarService.findAllOperators(String(new Date().getFullYear()), String(new Date().getUTCMonth() + 1))
           .subscribe(operator => this.operatorDtos = operator)
       },
       error => {
@@ -149,7 +172,7 @@ export class CalendarComponent implements OnInit {
     this.calendarService.delete(id).subscribe(() => {
       this.errorMessage = '';
       this.message = 'Оператор был успешно удален!';
-      this.calendarService.findAllOperators(String(new Date().getFullYear()), new Date().getUTCMonth() + 1)
+      this.calendarService.findAllOperators(String(new Date().getFullYear()), String(new Date().getUTCMonth() + 1))
         .subscribe(operator => this.operatorDtos = operator)
     }, () => {
       this.errorMessage = 'При удалении темы произошла ошибка!';
@@ -166,5 +189,16 @@ export class CalendarComponent implements OnInit {
       total_hours: 0,
       total_salary: 0,
     };
+  }
+
+  test(d: number, op: OperatorDto): number {
+    const array: Salary[] = op.salaries.filter(e => {
+      return Number(e.date.toString().split("-")[2]) === d;
+    });
+    if (array.length > 0) {
+      return array[0].totalHours
+    } else {
+      return 0
+    }
   }
 }

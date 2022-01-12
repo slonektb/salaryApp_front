@@ -35,9 +35,8 @@
             <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('fullName')?.value}}</td>
             <!--            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('periods')?.value.controls}}-->
             <td>
-              <p>1</p>
               <div formArrayName="periods"
-                   *ngFor="let period of getPeriods(getOper.get('periods')).controls; let i = index">
+                   *ngFor="let period of getPeriods(getOper.get('periods')).value.controls; let i = index">
                 <div class="form-control">
                   <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="begin">
                   <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="end">
