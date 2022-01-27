@@ -12,11 +12,11 @@ export class GlobalGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-    if (this.authService.isLogin()) {
+//    if (this.authService.isLogin()) {
       return true;
-    } else {
-      this.router.navigate(['']);
-      return false;
-    }
+//    } else {
+//      this.router.navigate(['']);
+//      return false;
+//    }
   }
 }

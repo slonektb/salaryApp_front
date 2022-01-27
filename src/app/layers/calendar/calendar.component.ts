@@ -59,11 +59,13 @@ export class CalendarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.findALL()
+
+    this.findALL()
     console.log('days: ' + this.days)
   }
 
   findALL() {
+    this.operForm.get('date')!.setValue(this.year + "-" + this.month);
     const date: string[] = this.operForm.get(['date'])!.value.split('-')
     this.calendarService.findAllOperators(date[0], date[1])
       .subscribe(response => {

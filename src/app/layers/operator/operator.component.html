@@ -3,7 +3,7 @@
     <form class="form-group" [formGroup]="formOpers" (ngSubmit)="submit()">
       <div class="row">
         <div class="col-md-4">
-          <h4>Добавление периода работы</h4>
+          <h4>Добавление периода работы ({{dateEdit}})</h4>
         </div>
         <div class="col-md-6">
           <button type="submit" class="btn btn-primary" style="display: block; margin-left: 630px"
@@ -25,29 +25,49 @@
           <tr>
             <th>ID</th>
             <th>ФИ</th>
-            <th colspan="idx">Периоды</th>
+            <th colspan="2">Периоды</th>
             <th>Итого часов</th>
           </tr>
           </thead>
           <tbody>
-          <tr formArrayName="opers" *ngFor="let getOper of getOpers().controls; let i = index">
-            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('id')?.value}}</td>
-            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('fullName')?.value}}</td>
-            <!--            <td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('periods')?.value.controls}}-->
-            <td>
-              <div formArrayName="periods"
-                   *ngFor="let period of getPeriods(getOper.get('periods')).value.controls; let i = index">
-                <div class="form-control">
-                  <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="begin">
-                  <input style="width: 55px" type="number" formGroupName="{{i.toString()}}" formControlName="end">
-                </div>
-              </div>
-              <!--            </td>-->
-            </td>
-            <td style="border: 1px solid black">
-              <button class="btn" type="button" (click)="addPeriodsToOperator()">+</button>
-            </td>
+
+          <ng-container formArrayName="opers">
+
+          <tr *ngFor="let getOper of getOpers().controls; let i = index">
+            <ng-container formGroupName="{{i.toString()}}">
+              <td style="border: 1px solid black">{{getOper.get('id')?.value}}</td>
+              <td style="border: 1px solid black">{{getOper.get('fullName')?.value}}</td>
+              <!--<td [formGroupName]="i.toString()" style="border: 1px solid black">{{getOper.get('periods')?.value.controls}}-->
+
+              <td style="border: 1px solid black"> <!---->
+
+                <!--<ng-container formArrayName="periods">-->
+                     <div
+                          *ngFor="let period of getPeriods(getOper.get('periods')).value.controls; let ii = index">                 <!--.value.controls   getPeriods(getOper.get('periods')).controls-->
+                      <div class="form-control">
+                          <form disabled="true" [formGroup]="period">
+                            <input style="width: 55px" type="number" formControlName="begin">
+                            <input style="width: 55px" type="number" formControlName="end">
+                            <button class="btn btn-warning" style="margin-left: 5px" type="button" (click)="openModalWindowAskDelete(del,i,ii, period.get('begin')?.value+':'+period.get('end')?.value)">-</button>
+                          </form>
+                      </div>
+                    </div>
+                <!--</ng-container>-->
+
+     <!--            </td>-->
+              </td>
+
+              <td style="border: 1px solid black">
+                <button class="btn btn-success" type="button" (click)="openModalWindowAskAdd(addPeriod,i)">+</button>
+              </td>
+              <td style="border: 1px solid black">
+                {{getOper.get('totalHours')?.value}}
+              </td>
+            </ng-container>
           </tr>
+
+          </ng-container>
+
           </tbody>
         </table>
         <!--        {{formOpers.value | json}}-->
@@ -56,6 +76,38 @@
   </div>
 </div>
 
+<ng-template #addPeriod let-modal>
+  <form [formGroup]="perForm">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-answer-add">Добавить период?
+      </h3>
+    </div>
+    <div class="modal-footer">
+      <div class="form-control">
+        <label>begin</label>
+        <input type="number" class="form-control" formControlName="begin1">
+        <label>end</label>
+        <input type="number" class="form-control" formControlName="end1">
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cancel')"><span>Отменить</span></button>
+      <button type="button" class="btn btn-danger" (click)="modal.close('Save')" [disabled]="perForm.invalid">
+        <span>Сохранить</span></button>
+    </div>
+  </form>
+</ng-template>
 
-
-
+<ng-template #del let-modal>
+  <form [formGroup]="perForm">
+    <div class="modal-header">
+      <h3 class="modal-title">Хотите удалить период {{strPeriodForDel}} ?
+      </h3>
+    </div>
+    <div class="modal-body">
+      Период будет удален!
+    </div>
+  </form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss('Cancel')"><span>Отменить</span></button>
+    <button type="button" class="btn btn-danger" (click)="modal.close('Delete')"><span>Удалить</span></button>
+  </div>
+</ng-template>

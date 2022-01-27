@@ -16,6 +16,10 @@ import {DetailSalary} from "../../model/detailSalary";
 import {Subscription} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {DatePipe} from "@angular/common";
+import {Salary} from "../../model/salary";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {toNumbers} from "@angular/compiler-cli/src/version_helpers";
+
 
 
 @Component({
@@ -26,9 +30,11 @@ import {DatePipe} from "@angular/common";
 })
 export class OperatorComponent implements OnInit {
 
+  sal: Salary = new Salary(0,new Date(),0,0,0);
   loading: boolean = false;
   detailSalary: DetailSalary[] = [];
   detailSalaryDtos: DetailSalaryDto[] = [];
+  detailSalaryDtosForSave: DetailSalaryDto[] = [];
   // operatorDTO: OperatorDto[] = [];
   subscription: Subscription;
   day: string = '';
@@ -36,10 +42,12 @@ export class OperatorComponent implements OnInit {
   year: string = '';
   datePaginator = new Date();
 
+  dateEdit: String = '';
+
   clicked: boolean = false
 
   constructor(public operatorService: OperatorService, private formBuilder: FormBuilder
-              , activateRoute: ActivatedRoute) {
+              , activateRoute: ActivatedRoute, private modalService: NgbModal) {
     this.subscription = activateRoute.params.subscribe(params => this.day = params['day']),
     this.subscription = activateRoute.params.subscribe(params => this.month = params['month']),
     this.subscription = activateRoute.params.subscribe(params => this.year = params['year'])
@@ -47,7 +55,7 @@ export class OperatorComponent implements OnInit {
 
   ngOnInit(): void {
     this.findAllOperators()
-
+    this.dateEdit = (this.day.length > 1 ? this.day:"0" + this.day) + "." + (this.month.length > 1 ? this.month: "0" + this.month) + "." + this.year;
   }
 
   getAllDetails() {
@@ -57,21 +65,28 @@ export class OperatorComponent implements OnInit {
   }
 
   fillOperators() {
-    console.log(this.detailSalaryDtos)
+   // console.log(this.detailSalaryDtos)
+    let salId: number = -1;
+    let totalHours: number = 0;
     for (let operator of this.detailSalaryDtos) {
       const arrayPeriod = this.formBuilder.array([]);
       for (let period of operator.salaries) {
+        salId = period.salary.id;
+        totalHours = period.salary.totalHours;
         arrayPeriod.push(this.formBuilder.group({
-          begin: [period.begin],
-          end: [period.end]
+          id: [period.id],
+          begin: [{value: period.begin, disabled: true}],
+          end: [{value: period.end, disabled: true}]
         }))
       }
-      console.log(arrayPeriod);
+     // console.log(arrayPeriod);
       (this.formOpers.get('opers') as FormArray).push(
         this.formBuilder.group({
           id: [operator.id],
           fullName: [operator.fullName],
-          periods: [arrayPeriod]
+          periods: [arrayPeriod],
+          salId: [salId],
+          totalHours: [totalHours]
         })
       )
       // this.formOpers.addControl(String(operator.id), new FormArray([]))
@@ -82,7 +97,7 @@ export class OperatorComponent implements OnInit {
   }
 
   formOpers = this.formBuilder.group({
-    opers: this.formBuilder.array([])
+    opers: this.formBuilder.array([]),
   });
 
   findAllOperators() {
@@ -95,35 +110,128 @@ export class OperatorComponent implements OnInit {
   }
 
   getOpers(): FormArray {
+   // console.log(this.formOpers.get('opers') as FormArray)
     return this.formOpers.get('opers') as FormArray;
   }
 
   getPeriods(arrayPeriod: AbstractControl | null): FormArray {
-    // console.log(arrayPeriod as FormArray)
+     //console.log(arrayPeriod as FormArray)
     if (arrayPeriod) {
-      return (arrayPeriod as FormArray);
+
+       // console.log(arrayPeriod.value as FormArray)
+        return (arrayPeriod as FormArray);
+
     }
     return new FormArray([]);
   }
 
+  perForm: FormGroup = this.createForm();
+  message: string = '';
+  strPeriodForDel: string = '';
+
+  private createForm() {
+    return this.formBuilder.group({
+       "begin1": [0, [Validators.required, Validators.minLength(1)]],
+       "end1": [0, [Validators.required, Validators.minLength(1)]]
+    });
+  }
+
+  save(idx:number):void {
+    let begin = this.perForm.get('begin1')!.value;
+    let end = this.perForm.get('end1')!.value;
+    const formGroup = new FormGroup({});
+    formGroup.addControl(String('id' ), new FormControl(-1));
+    formGroup.addControl(String('begin' ), new FormControl({value: begin, disabled: true}));
+    formGroup.addControl(String('end' ), new FormControl({value: end, disabled: true}));
+
+    (<FormArray>this.getOpers().at(idx).get("periods")?.value).push(formGroup);
+
+  }
+
+  openModalWindowAskAdd(content: any, id: number) {
+    this.message = '';
+    this.modalService.open(content, {ariaLabelledBy: 'modal-answer-add'}).result.then(() => {
+        this.save(id);
+    });
+  }
+
+  openModalWindowAskDelete(del: any, idOper: number, idPerod: number, str: string): void {
+    this.message = '';
+    this.strPeriodForDel = str;
+    this.modalService.open(del, {ariaLabelledBy: 'modal-answer-delete'}).result.then(() => {
+      this.rmPeriodromOpers(idOper,idPerod);
+    }, () => {
+      this.strPeriodForDel = '';
+    });
+  }
   addPeriodsToOperator() {
-    // this.operatorService.findAllDetailSalary(
-    //   String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getDay())
-    //   .subscribe(response => {
-    //     // this.detailSalaryDtos = response;
-    //     console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
-    //     for (let detailSal of this.detailSalaryDtos) {
-    //       this.formOpers.addControl(String(detailSal.id), new FormArray([]));
-    //       for (let d of detailSal.salaries) {
-    //         const formGroup = new FormGroup({});
-    //         formGroup.addControl(String('begin' + d.id), new FormControl(d.begin));
-    //         formGroup.addControl(String('end' + d.id), new FormControl(d.end));
-    //
-    //         (<FormArray>this.formOpers.get(String(detailSal.id))).push(formGroup);
-    //       }
-    //     }
-    //     console.log('Данные метода addPeriodsToOperator', this.detailSalaryDtos)
-    //   })
+     // this.operatorService.findAllDetailSalary(
+     //   String(new Date().getFullYear()), new Date().getUTCMonth() + 1, new Date().getDay())
+     //   .subscribe(response => {
+     //     // this.detailSalaryDtos = response;
+     //     console.log('Данные метода addPeriodsToOperator (start)', this.detailSalaryDtos)
+     //     for (let detailSal of this.detailSalaryDtos) {
+     //       this.formOpers.addControl(String(detailSal.id), new FormArray([]));
+     //       for (let d of detailSal.salaries) {
+     //         const formGroup = new FormGroup({});
+     //         formGroup.addControl(String('begin' + d.id), new FormControl(d.begin));
+     //         formGroup.addControl(String('end' + d.id), new FormControl(d.end));
+     //
+     //         (<FormArray>this.formOpers.get(String(detailSal.id))).push(formGroup);
+     //       }
+     //     }
+     //     console.log('Данные метода addPeriodsToOperator (finish)', this.detailSalaryDtos)
+     //   })
+
+
+  }
+
+  rmPeriodromOpers(idxOper:number,idxPeriod:number) {
+        (<FormArray>this.getOpers().at(idxOper).get("periods")?.value).removeAt(idxPeriod);
+  }
+
+  submit() {
+    // const form = {...this.formOpers}
+    // console.log("Form: ", form)
+
+
+    this.detailSalaryDtosForSave = [];
+
+    for (let oper of  this.getOpers().controls) {
+
+      let detailSalary1: DetailSalary[] = [];
+
+      let dayStr: String = this.day;
+      let monthStr: String = this.month;
+      if (dayStr.length < 2) dayStr = "0" + dayStr;
+      if (monthStr.length < 2) monthStr = "0" + monthStr;
+
+      let salDate = new Date(this.year + "-" + monthStr + "-" + dayStr);
+      this.sal.date = salDate;
+      this.sal.id = oper.value.salId;
+      oper.get("periods")?.value.enable();
+      let sumHours: number = 0;
+      for (let period of oper.get("periods")!.value.controls) {
+
+        let b: number = period.value.begin;
+        let e: number = period.value.end;
+        let sum:number = e - b;
+        sumHours = sumHours + sum;
+        detailSalary1.push({
+          id: period.value.id,
+          salary: this.sal,
+          begin: b,
+          end: e,
+          total: sum
+        })
+      }
+      oper.get("periods")?.value.disable();
+
+      oper.get("totalHours")!.setValue(sumHours);
+
+      this.detailSalaryDtosForSave.push( {begin: 0, end: 0, fullName: oper.value.fullName, salaries: detailSalary1, id: oper.value.id});
+    }
+    console.log(this.detailSalaryDtosForSave);
   }
 
   // change() {
@@ -168,10 +276,7 @@ export class OperatorComponent implements OnInit {
   //   })
   // }
 
-  submit() {
-    const form = {...this.formOpers}
-    console.log("Form: ", form)
-  }
+
 
   // addPeriod(id: number) {
   //   this.idx++
