@@ -19,7 +19,8 @@ import {DatePipe} from "@angular/common";
 import {Salary} from "../../model/salary";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {toNumbers} from "@angular/compiler-cli/src/version_helpers";
-
+import {SalaryForUpdate} from "../../model/salaryForUpdate";
+import {DetailSalaryForUpdate} from "../../model/detailSalaryForupdate";
 
 
 @Component({
@@ -35,6 +36,9 @@ export class OperatorComponent implements OnInit {
   detailSalary: DetailSalary[] = [];
   detailSalaryDtos: DetailSalaryDto[] = [];
   detailSalaryDtosForSave: DetailSalaryDto[] = [];
+
+  salaryForUpdate: SalaryForUpdate[] = [];
+
   // operatorDTO: OperatorDto[] = [];
   subscription: Subscription;
   day: string = '';
@@ -66,6 +70,7 @@ export class OperatorComponent implements OnInit {
 
   fillOperators() {
    // console.log(this.detailSalaryDtos)
+
     let salId: number = -1;
     let totalHours: number = 0;
     for (let operator of this.detailSalaryDtos) {
@@ -89,6 +94,8 @@ export class OperatorComponent implements OnInit {
           totalHours: [totalHours]
         })
       )
+      totalHours = 0;
+      salId = -1;
       // this.formOpers.addControl(String(operator.id), new FormArray([]))
       // this.formOpers.addControl(String(operator.id) + '-name', new FormControl(operator.fullName))
     }
@@ -190,16 +197,14 @@ export class OperatorComponent implements OnInit {
         (<FormArray>this.getOpers().at(idxOper).get("periods")?.value).removeAt(idxPeriod);
   }
 
-  submit() {
-    // const form = {...this.formOpers}
-    // console.log("Form: ", form)
 
-
-    this.detailSalaryDtosForSave = [];
-
+  //--------------------------------------
+  // Сохранение периодов и запись в БД
+  //--------------------------------------
+  submitAndSave () {
+    this.salaryForUpdate = [];
     for (let oper of  this.getOpers().controls) {
-
-      let detailSalary1: DetailSalary[] = [];
+      let detailSalaryForUpdate: DetailSalaryForUpdate[] = [];
 
       let dayStr: String = this.day;
       let monthStr: String = this.month;
@@ -209,29 +214,87 @@ export class OperatorComponent implements OnInit {
       let salDate = new Date(this.year + "-" + monthStr + "-" + dayStr);
       this.sal.date = salDate;
       this.sal.id = oper.value.salId;
+
+      //разрешаю изменение периодов, что бы получить доступ до данных
       oper.get("periods")?.value.enable();
+
       let sumHours: number = 0;
-      for (let period of oper.get("periods")!.value.controls) {
+      for (let period of oper.get("periods")?.value.controls) {
 
         let b: number = period.value.begin;
         let e: number = period.value.end;
         let sum:number = e - b;
         sumHours = sumHours + sum;
-        detailSalary1.push({
+
+        detailSalaryForUpdate.push({
           id: period.value.id,
-          salary: this.sal,
           begin: b,
-          end: e,
-          total: sum
+          end: e
         })
+        sum = 0;
       }
       oper.get("periods")?.value.disable();
 
       oper.get("totalHours")!.setValue(sumHours);
+      sumHours = 0;
 
-      this.detailSalaryDtosForSave.push( {begin: 0, end: 0, fullName: oper.value.fullName, salaries: detailSalary1, id: oper.value.id});
+      this.salaryForUpdate.push( {dateSalary: this.sal.date, detailSalary: detailSalaryForUpdate, idOperator: oper.value.id, idSalary: this.sal.id});
     }
-    console.log(this.detailSalaryDtosForSave);
+    console.log(this.salaryForUpdate);
+
+    //попытка отправки данных на сервер
+    this.operatorService.postDetailSalaryUpdate(this.salaryForUpdate).subscribe(() => {
+        //this.findAllOperators();
+        console.log("Периоды сохранены!")
+    }, () => {
+        console.log("Ошибка при сохранении периодов!")
+    });
+  }
+
+  submit() {
+    // const form = {...this.formOpers}
+    // console.log("Form: ", form)
+
+    //
+    // this.detailSalaryDtosForSave = [];
+    //
+    // for (let oper of  this.getOpers().controls) {
+    //
+    //   let detailSalary1: DetailSalary[] = [];
+    //
+    //   let dayStr: String = this.day;
+    //   let monthStr: String = this.month;
+    //   if (dayStr.length < 2) dayStr = "0" + dayStr;
+    //   if (monthStr.length < 2) monthStr = "0" + monthStr;
+    //
+    //   let salDate = new Date(this.year + "-" + monthStr + "-" + dayStr);
+    //   this.sal.date = salDate;
+    //   this.sal.id = oper.value.salId;
+    //   oper.get("periods")?.value.enable();
+    //   let sumHours: number = 0;
+    //   for (let period of oper.get("periods")?.value.controls) {
+    //
+    //     let b: number = period.value.begin;
+    //     let e: number = period.value.end;
+    //     let sum:number = e - b;
+    //     sumHours = sumHours + sum;
+    //     detailSalary1.push({
+    //       id: period.value.id,
+    //       salary: this.sal,
+    //       begin: b,
+    //       end: e,
+    //       total: sum
+    //     })
+    //     sum = 0;
+    //   }
+    //   oper.get("periods")?.value.disable();
+    //
+    //   oper.get("totalHours")!.setValue(sumHours);
+    //   sumHours = 0;
+    //
+    //   this.detailSalaryDtosForSave.push( {begin: 0, end: 0, fullName: oper.value.fullName, salaries: detailSalary1, id: oper.value.id});
+    // }
+//    console.log(this.detailSalaryDtosForSave);
   }
 
   // change() {

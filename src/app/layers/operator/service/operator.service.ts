@@ -5,6 +5,7 @@ import {URL_SERVER} from "../../../model/app.constants";
 import {OperatorDto} from "../../../model/operatorDto";
 import {DetailSalaryDto} from "../../../model/detailSalaryDto";
 import {DetailSalary} from "../../../model/detailSalary";
+import {SalaryForUpdate} from "../../../model/salaryForUpdate";
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,10 @@ export class OperatorService {
 
   getAllDetails(): Observable<DetailSalary[]> {
     return this.http.get<DetailSalary[]>(`${this.url}/details`)
+  }
+
+  postDetailSalaryUpdate(salarys: SalaryForUpdate[]): Observable<{}> {
+    return this.http.post<SalaryForUpdate[]>(`${this.url}/details/update`, salarys);
   }
 
   // findById(id: number): Observable<{}> {
